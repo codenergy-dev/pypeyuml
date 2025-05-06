@@ -1,7 +1,5 @@
-from pypeyuml.depth_first_search import depth_first_search
-from pypeyuml.execute_pipelines import execute_pipelines
-from pypeyuml.parse_yuml import parse_yuml
-from pypeyuml.topological_sort import topological_sort
+from pypeyuml.run_pipelines import run_pipelines
+from pypeyuml.yuml_to_pipelines import yuml_to_pipelines
 
 if __name__ == "__main__":
   import sys
@@ -11,22 +9,6 @@ if __name__ == "__main__":
 
   yuml_path = sys.argv[1]
   pipelines_dir = sys.argv[2]
-  
-  nodes, edges = parse_yuml(yuml_path)
-  
-  print("\n➡️  Pipelines:\n")
-  print(", ".join(list(nodes.keys())))
 
-  print("\n🔀 Paths:\n")
-  paths = depth_first_search(edges)
-  for path in paths:
-    print(path)
-  
-  pipeline_order, graph = topological_sort(nodes, edges)
-  
-  print("\n🔢 Order:\n")
-  for i, pipeline in enumerate(pipeline_order):
-    print(f"{i + 1:02} {pipeline}")
-  
-  print("\n▶️  Execution:")
-  execute_pipelines(pipelines_dir, pipeline_order, graph, nodes)
+  pipelines = yuml_to_pipelines(yuml_path)
+  run_pipelines(pipelines_dir, pipelines)
