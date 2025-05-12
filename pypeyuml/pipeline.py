@@ -16,3 +16,4 @@ class Pipeline:
     self.fanOut: list[str] = []
     self.state: PipelineState = PipelineState.IDLE
     self.input: dict = {}
+    self.output = None

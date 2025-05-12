@@ -11,25 +11,26 @@ def run_next_pipeline(dir: str, pipelines: list[Pipeline], pipeline: Pipeline):
   if not pipeline:
     return
   elif set(pipeline.fanInCheck) == set(pipeline.fanIn):
-    pipeline.state = PipelineState.EXEC
-    output = load_pipeline_info(dir, pipeline.function)({ **pipeline.input, **pipeline.args })
+    if pipeline.state in [PipelineState.IDLE, PipelineState.WAIT]:
+      pipeline.state = PipelineState.EXEC
+      pipeline.output = load_pipeline_info(dir, pipeline.function)({ **pipeline.input, **pipeline.args })
 
-    pipeline.state = PipelineState.DONE
-    pipeline.fanInCheck.clear()
+      pipeline.state = PipelineState.DONE
+      pipeline.fanInCheck.clear()
 
-    if output is None:
-      return
-    elif isinstance(output, dict):
-      print(f"\n✅ {pipeline.name}")
-      output = [output]
-    elif isinstance(output, list):
-      print(f"\n🔁 {pipeline.name} ({len(output)})")
-    else:
-      raise ValueError(f"Unexpected output ({output}) for pipeline {pipeline.name}.")
-    
-    [print_key_values(item) for item in output if isinstance(item, dict)]
+      if pipeline.output is None:
+        return
+      elif isinstance(pipeline.output, dict):
+        print(f"\n✅ {pipeline.name}")
+        pipeline.output = [pipeline.output]
+      elif isinstance(pipeline.output, list):
+        print(f"\n🔁 {pipeline.name} ({len(pipeline.output)})")
+      else:
+        raise ValueError(f"Unexpected output ({pipeline.output}) for pipeline {pipeline.name}.")
+      
+      [print_key_values(output) for output in pipeline.output if isinstance(output, dict)]
   
-    for output in output:
+    for output in pipeline.output:
       for fanOut in pipeline.fanOut:
         nextPipeline = next((
           nextPipeline for nextPipeline in pipelines if
