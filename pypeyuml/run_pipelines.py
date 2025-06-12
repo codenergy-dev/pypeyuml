@@ -30,8 +30,11 @@ def run_next_pipeline(dir: str, pipelines: list[Pipeline], pipeline: Pipeline):
       
       [print_key_values(output) for output in pipeline.output if isinstance(output, dict)]
   
+    fanOutList = [pipeline.fanOutPending] if pipeline.fanOutPending else pipeline.fanOut
+    pipeline.fanOutPending = None
+    
     for output in pipeline.output:
-      for fanOut in pipeline.fanOut:
+      for fanOut in fanOutList:
         nextPipeline = next((
           nextPipeline for nextPipeline in pipelines if
           nextPipeline.name == fanOut
@@ -40,7 +43,7 @@ def run_next_pipeline(dir: str, pipelines: list[Pipeline], pipeline: Pipeline):
         nextPipeline.fanInCheck.append(pipeline.name)
         nextPipeline.input.update(output)
       
-      for fanOut in pipeline.fanOut:
+      for fanOut in fanOutList:
         nextPipeline = next((
           nextPipeline for nextPipeline in pipelines if
           nextPipeline.name == fanOut and
@@ -59,4 +62,5 @@ def run_next_pipeline(dir: str, pipelines: list[Pipeline], pipeline: Pipeline):
     ), None)
     if nextPipeline:
       print(f"\nℹ️  [{nextPipeline.name}]<-[{pipeline.name}]")
+      nextPipeline.fanOutPending = pipeline.name
     run_next_pipeline(dir, pipelines, nextPipeline)

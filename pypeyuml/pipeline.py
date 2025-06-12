@@ -14,6 +14,7 @@ class Pipeline:
     self.fanIn: list[str] = []
     self.fanInCheck: list[str] = []
     self.fanOut: list[str] = []
+    self.fanOutPending: str = None
     self.state: PipelineState = PipelineState.IDLE
     self.input: dict = {}
     self.output = None
